@@ -6,5 +6,7 @@ import (
 )
 
 func main() {
+	server := api.NewWebScraper(":3000")
 	fmt.Printf("Msg: %s", api.Test())
+	server.Run()
 }
