@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"github.com/LysetsDal/webscraper-v2/service/scraper"
 	. "github.com/LysetsDal/webscraper-v2/utils"
 	"github.com/gorilla/mux"
@@ -13,10 +14,6 @@ import (
 )
 
 const listenAddr string = "127.0.0.1:"
-
-func Test() string {
-	return "Hello, World!"
-}
 
 type WebScraper struct {
 	Name          string
@@ -51,11 +48,11 @@ func NewWebScraper(listenAddr string) *WebScraper {
 	}
 }
 
-func (s *WebScraper) Run() {
+func (s *WebScraper) Run(targetURL string) {
 	router := mux.NewRouter()
 	subrouter := router.PathPrefix("/api/v2").Subrouter()
 
-	scraperHandler := scraper.NewHandler(s.ScraperClient)
+	scraperHandler := scraper.NewHandler(s.ScraperClient, targetURL)
 	scraperHandler.RegisterRoutes(subrouter)
 
 	subrouter.HandleFunc("/", MakeHttpHandleFunc(s.HomeHandler))
@@ -69,7 +66,14 @@ func (s *WebScraper) Run() {
 	// Graceful shutdown on ctrl + c:
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
-	<-c
+
+	// This Blocks until signal received from c
+	QUIT := <-c
+	fmt.Println("Got Signal: ", QUIT)
+}
+
+func (s *WebScraper) DisplayStartMsg() string {
+	return fmt.Sprintf("Started web-scraper service on port: %s", s.ListenAddr)
 }
 
 func (s *WebScraper) HomeHandler(w http.ResponseWriter, _ *http.Request) error {
