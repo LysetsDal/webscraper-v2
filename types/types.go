@@ -1,9 +1,15 @@
 package types
 
 import (
-	"golang.org/x/net/html"
+	// "math/rand"
 	"net/http"
+	"time"
 )
+
+type CreateEntryRequest struct {
+	Name   string `json:"name"`
+	Status string `json:"status"`
+}
 
 // ApiFunc Decorator pattern to 'wrap' http.HandlerFunc
 type ApiFunc func(http.ResponseWriter, *http.Request) error
@@ -16,10 +22,23 @@ type ApiMessage struct {
 	Message string `json:"message"`
 }
 
-type HtmlResponse struct {
-	Body html.Node `json:"Response"`
+type Entry struct {
+	ID        int       `json:"ID"`
+	Name      string    `json:"name"`
+	Status    string    `json:"status"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-type RequestData struct {
-	URL string `json:"url"`
+func NewEntry(name, status string) *Entry {
+	return &Entry{
+		// ID: rand.Intn(10000),
+		Name:   name,
+		Status: status,
+		UpdatedAt: time.Now().UTC(),
+	}
+}
+
+type ListMessage struct {
+	Length int     `json:"length"`
+	List   []Entry `json:"entry"`
 }
